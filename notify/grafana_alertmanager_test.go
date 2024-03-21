@@ -11,7 +11,9 @@ import (
 	"github.com/go-kit/log"
 	"github.com/go-openapi/strfmt"
 	amv2 "github.com/prometheus/alertmanager/api/v2/models"
+	"github.com/prometheus/alertmanager/config"
 	"github.com/prometheus/alertmanager/notify"
+	"github.com/prometheus/alertmanager/pkg/labels"
 	"github.com/prometheus/alertmanager/provider/mem"
 	"github.com/prometheus/alertmanager/types"
 	"github.com/prometheus/client_golang/prometheus"
@@ -310,6 +312,171 @@ func TestPutAlert(t *testing.T) {
 			require.Equal(t, expAlerts, alerts)
 		})
 	}
+}
+
+func TestCreateSilence(t *testing.T) {
+	am, _ := setupAMTest(t)
+
+	cases := []struct {
+		name    string
+		silence PostableSilence
+		expErr  string
+	}{{
+		name: "can create silence for foo=bar",
+		silence: PostableSilence{
+			Silence: amv2.Silence{
+				Comment:   ptr("This is a comment"),
+				CreatedBy: ptr("test"),
+				EndsAt:    ptr(strfmt.DateTime(time.Now().Add(time.Minute))),
+				Matchers: amv2.Matchers{{
+					IsEqual: ptr(true),
+					IsRegex: ptr(false),
+					Name:    ptr("foo"),
+					Value:   ptr("bar"),
+				}},
+				StartsAt: ptr(strfmt.DateTime(time.Now())),
+			},
+		},
+	}, {
+		name: "can create silence for _foo1=bar",
+		silence: PostableSilence{
+			Silence: amv2.Silence{
+				Comment:   ptr("This is a comment"),
+				CreatedBy: ptr("test"),
+				EndsAt:    ptr(strfmt.DateTime(time.Now().Add(time.Minute))),
+				Matchers: amv2.Matchers{{
+					IsEqual: ptr(true),
+					IsRegex: ptr(false),
+					Name:    ptr("_foo1"),
+					Value:   ptr("bar"),
+				}},
+				StartsAt: ptr(strfmt.DateTime(time.Now())),
+			},
+		},
+	}, {
+		name: "can create silence for 0foo=bar",
+		silence: PostableSilence{
+			Silence: amv2.Silence{
+				Comment:   ptr("This is a comment"),
+				CreatedBy: ptr("test"),
+				EndsAt:    ptr(strfmt.DateTime(time.Now().Add(time.Minute))),
+				Matchers: amv2.Matchers{{
+					IsEqual: ptr(true),
+					IsRegex: ptr(false),
+					Name:    ptr("0foo"),
+					Value:   ptr("bar"),
+				}},
+				StartsAt: ptr(strfmt.DateTime(time.Now())),
+			},
+		},
+	}, {
+		name: "can create silence for foo=🙂bar",
+		silence: PostableSilence{
+			Silence: amv2.Silence{
+				Comment:   ptr("This is a comment"),
+				CreatedBy: ptr("test"),
+				EndsAt:    ptr(strfmt.DateTime(time.Now().Add(time.Minute))),
+				Matchers: amv2.Matchers{{
+					IsEqual: ptr(true),
+					IsRegex: ptr(false),
+					Name:    ptr("foo"),
+					Value:   ptr("🙂bar"),
+				}},
+				StartsAt: ptr(strfmt.DateTime(time.Now())),
+			},
+		},
+	}, {
+		name: "can create silence for foo🙂=bar",
+		silence: PostableSilence{
+			Silence: amv2.Silence{
+				Comment:   ptr("This is a comment"),
+				CreatedBy: ptr("test"),
+				EndsAt:    ptr(strfmt.DateTime(time.Now().Add(time.Minute))),
+				Matchers: amv2.Matchers{{
+					IsEqual: ptr(true),
+					IsRegex: ptr(false),
+					Name:    ptr("foo🙂"),
+					Value:   ptr("bar"),
+				}},
+				StartsAt: ptr(strfmt.DateTime(time.Now())),
+			},
+		},
+	}, {
+		name: "can't create silence for missing label name",
+		silence: PostableSilence{
+			Silence: amv2.Silence{
+				Comment:   ptr("This is a comment"),
+				CreatedBy: ptr("test"),
+				EndsAt:    ptr(strfmt.DateTime(time.Now().Add(time.Minute))),
+				Matchers: amv2.Matchers{{
+					IsEqual: ptr(true),
+					IsRegex: ptr(false),
+					Name:    ptr(""),
+					Value:   ptr("bar"),
+				}},
+				StartsAt: ptr(strfmt.DateTime(time.Now())),
+			},
+		},
+		expErr: "unable to save silence: silence invalid: invalid label matcher 0: invalid label name \"\": unable to create silence",
+	}, {
+		name: "can't create silence for missing label value",
+		silence: PostableSilence{
+			Silence: amv2.Silence{
+				Comment:   ptr("This is a comment"),
+				CreatedBy: ptr("test"),
+				EndsAt:    ptr(strfmt.DateTime(time.Now().Add(time.Minute))),
+				Matchers: amv2.Matchers{{
+					IsEqual: ptr(true),
+					IsRegex: ptr(false),
+					Name:    ptr("foo"),
+					Value:   ptr(""),
+				}},
+				StartsAt: ptr(strfmt.DateTime(time.Now())),
+			},
+		},
+		expErr: "unable to save silence: silence invalid: at least one matcher must not match the empty string: unable to create silence",
+	}}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			silenceID, err := am.CreateSilence(&c.silence)
+			if c.expErr != "" {
+				require.EqualError(t, err, c.expErr)
+				require.Empty(t, silenceID)
+			} else {
+				require.NoError(t, err)
+				require.NotEmpty(t, silenceID)
+			}
+		})
+	}
+}
+
+func TestGrafanaAlertmanager_setInhibitionRulesMetrics(t *testing.T) {
+	am, reg := setupAMTest(t)
+
+	m1, err := labels.NewMatcher(labels.MatchEqual, "foo", "bar")
+	require.NoError(t, err)
+	m2, err := labels.NewMatcher(labels.MatchEqual, "bar", "baz")
+	require.NoError(t, err)
+	m3, err := labels.NewMatcher(labels.MatchEqual, "baz", "qux")
+	require.NoError(t, err)
+	m4, err := labels.NewMatcher(labels.MatchEqual, "qux", "corge")
+	require.NoError(t, err)
+
+	r := []InhibitRule{{
+		SourceMatchers: config.Matchers{m1},
+		TargetMatchers: config.Matchers{m2},
+	}, {
+		SourceMatchers: config.Matchers{m3},
+		TargetMatchers: config.Matchers{m4},
+	}}
+	am.setInhibitionRulesMetrics(r)
+
+	require.NoError(t, testutil.GatherAndCompare(reg, bytes.NewBufferString(`
+							# HELP grafana_alerting_alertmanager_inhibition_rules Number of configured inhibition rules.
+        	            	# TYPE grafana_alerting_alertmanager_inhibition_rules gauge
+        	            	grafana_alerting_alertmanager_inhibition_rules{org="1"} 2
+`), "grafana_alerting_alertmanager_inhibition_rules"))
 }
 
 func TestGrafanaAlertmanager_setReceiverMetrics(t *testing.T) {
