@@ -288,7 +288,7 @@ func (tn *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error
 		Actions: []AdaptiveCardActionItem{
 			AdaptiveCardOpenURLActionItem{
 				Title: "View URL",
-				URL:   ruleURL,
+				URL:   ruleURL, // LOGZ.IO GRAFANA CHANGE :: DEV-43657 - Set logzio APP URLs for the URLs inside alert notifications
 			},
 		},
 	})
