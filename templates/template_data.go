@@ -163,7 +163,7 @@ func extendAlert(alert template.Alert, externalURL string, logger log.Logger) *E
 	if len(orgID) > 0 {
 		extended.SilenceURL = receivers.ToLogzioAppPath(setOrgIDQueryParam(u, orgID)) //LOGZ.IO GRAFANA CHANGE :: DEV-45466: complete fix switch to account query param functionality
 	} else {
-		extended.SilenceURL = u.String()
+		extended.SilenceURL = receivers.ToLogzioAppPath(u.String())
 	}
 	return extended
 }
