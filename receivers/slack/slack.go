@@ -298,14 +298,14 @@ func (sn *Notifier) commonAlertGeneratorURL(_ context.Context, alerts []*types.A
 
 func (sn *Notifier) createSlackMessage(ctx context.Context, alerts []*types.Alert) (*slackMessage, error) {
 	var tmplErr error
-	tmpl, _ := templates.TmplText(ctx, sn.tmpl, alerts, sn.log, &tmplErr)
+	tmpl, extendedData := templates.TmplText(ctx, sn.tmpl, alerts, sn.log, &tmplErr)
 
 	basePath := receivers.ToBasePathWithAccountRedirect(sn.tmpl.ExternalURL, alerts)                //LOGZ.IO GRAFANA CHANGE :: DEV-43657 - Set logzio APP URLs for the URLs inside alert notifications
 	ruleURL := receivers.ToLogzioAppPath(receivers.JoinURLPath(basePath, "/alerting/list", sn.log)) // LOGZ.IO GRAFANA CHANGE :: DEV-43657 - Set logzio APP URLs for the URLs inside alert notifications
 
 	// If all alerts have the same GeneratorURL, use that.
 	if sn.commonAlertGeneratorURL(ctx, alerts) {
-		ruleURL = alerts[0].GeneratorURL
+		ruleURL = extendedData.Alerts[0].GeneratorURL //LOGZ.IO GRAFANA CHANGE :: DEV-45466: complete fix switch to account query param functionality
 	}
 
 	title, truncated := receivers.TruncateInRunes(tmpl(sn.settings.Title), slackMaxTitleLenRunes)
