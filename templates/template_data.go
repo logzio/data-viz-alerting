@@ -101,15 +101,9 @@ func extendAlert(alert template.Alert, externalURL string, logger log.Logger) *E
 	}
 	externalPath := u.Path
 
-	generatorURL, err := url.Parse(extended.GeneratorURL)
 	if err != nil {
 		level.Debug(logger).Log("msg", "failed to parse generator URL while extending template data", "url", extended.GeneratorURL, "error", err.Error())
 		return extended
-	}
-
-	orgID := alert.Annotations[models.OrgIDAnnotation]
-	if len(orgID) > 0 {
-		extended.GeneratorURL = setOrgIDQueryParam(generatorURL, orgID)
 	}
 
 	dashboardUID := alert.Annotations[models.DashboardUIDAnnotation]
@@ -121,14 +115,9 @@ func extendAlert(alert template.Alert, externalURL string, logger log.Logger) *E
 			u.RawQuery = "viewPanel=" + panelID
 			extended.PanelURL = receivers.ToLogzioAppPath(receivers.AppendSwitchToAccountQueryParam(u, accountId).String()) // LOGZ.IO GRAFANA CHANGE :: DEV-45466: complete fix switch to account query param functionality
 		}
-		dashboardURL, err := url.Parse(extended.DashboardURL)
 		if err != nil {
 			level.Debug(logger).Log("msg", "failed to parse dashboard URL while extending template data", "url", extended.DashboardURL, "error", err.Error())
 			return extended
-		}
-		if len(orgID) > 0 {
-			extended.DashboardURL = setOrgIDQueryParam(dashboardURL, orgID)
-			extended.PanelURL = setOrgIDQueryParam(u, orgID)
 		}
 	}
 
@@ -160,20 +149,8 @@ func extendAlert(alert template.Alert, externalURL string, logger log.Logger) *E
 
 	u.RawQuery = query.Encode()
 	u = receivers.AppendSwitchToAccountQueryParam(u, accountId) // LOGZ.IO GRAFANA CHANGE :: DEV-45466: complete fix switch to account query param functionality
-	if len(orgID) > 0 {
-		extended.SilenceURL = receivers.ToLogzioAppPath(setOrgIDQueryParam(u, orgID)) // LOGZ.IO GRAFANA CHANGE :: DEV-45466: complete fix switch to account query param functionality
-	} else {
-		extended.SilenceURL = receivers.ToLogzioAppPath(u.String()) // LOGZ.IO GRAFANA CHANGE :: DEV-45466: complete fix switch to account query param functionality
-	}
+	extended.SilenceURL = receivers.ToLogzioAppPath(u.String()) // LOGZ.IO GRAFANA CHANGE :: DEV-45466: complete fix switch to account query param functionality
 	return extended
-}
-
-func setOrgIDQueryParam(url *url.URL, orgID string) string {
-	q := url.Query()
-	q.Set("orgId", orgID)
-	url.RawQuery = q.Encode()
-
-	return url.String()
 }
 
 func ExtendData(data *Data, logger log.Logger) *ExtendedData {
