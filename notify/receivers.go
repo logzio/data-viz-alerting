@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/grafana/alerting/receivers/logzio_opsgenie"
 	"net/url"
 	"sort"
 	"strings"
@@ -332,27 +333,28 @@ func ProcessIntegrationError(config *GrafanaIntegrationConfig, err error) error 
 
 // GrafanaReceiverConfig represents a parsed and validated APIReceiver
 type GrafanaReceiverConfig struct {
-	Name                string
-	AlertmanagerConfigs []*NotifierConfig[alertmanager.Config]
-	DingdingConfigs     []*NotifierConfig[dinding.Config]
-	DiscordConfigs      []*NotifierConfig[discord.Config]
-	EmailConfigs        []*NotifierConfig[email.Config]
-	GooglechatConfigs   []*NotifierConfig[googlechat.Config]
-	KafkaConfigs        []*NotifierConfig[kafka.Config]
-	LineConfigs         []*NotifierConfig[line.Config]
-	OpsgenieConfigs     []*NotifierConfig[opsgenie.Config]
-	PagerdutyConfigs    []*NotifierConfig[pagerduty.Config]
-	OnCallConfigs       []*NotifierConfig[oncall.Config]
-	PushoverConfigs     []*NotifierConfig[pushover.Config]
-	SensugoConfigs      []*NotifierConfig[sensugo.Config]
-	SlackConfigs        []*NotifierConfig[slack.Config]
-	TeamsConfigs        []*NotifierConfig[teams.Config]
-	TelegramConfigs     []*NotifierConfig[telegram.Config]
-	ThreemaConfigs      []*NotifierConfig[threema.Config]
-	VictoropsConfigs    []*NotifierConfig[victorops.Config]
-	WebhookConfigs      []*NotifierConfig[webhook.Config]
-	WecomConfigs        []*NotifierConfig[wecom.Config]
-	WebexConfigs        []*NotifierConfig[webex.Config]
+	Name                  string
+	AlertmanagerConfigs   []*NotifierConfig[alertmanager.Config]
+	DingdingConfigs       []*NotifierConfig[dinding.Config]
+	DiscordConfigs        []*NotifierConfig[discord.Config]
+	EmailConfigs          []*NotifierConfig[email.Config]
+	GooglechatConfigs     []*NotifierConfig[googlechat.Config]
+	KafkaConfigs          []*NotifierConfig[kafka.Config]
+	LineConfigs           []*NotifierConfig[line.Config]
+	OpsgenieConfigs       []*NotifierConfig[opsgenie.Config]
+	LogzioOpsgenieConfigs []*NotifierConfig[logzio_opsgenie.Config]
+	PagerdutyConfigs      []*NotifierConfig[pagerduty.Config]
+	OnCallConfigs         []*NotifierConfig[oncall.Config]
+	PushoverConfigs       []*NotifierConfig[pushover.Config]
+	SensugoConfigs        []*NotifierConfig[sensugo.Config]
+	SlackConfigs          []*NotifierConfig[slack.Config]
+	TeamsConfigs          []*NotifierConfig[teams.Config]
+	TelegramConfigs       []*NotifierConfig[telegram.Config]
+	ThreemaConfigs        []*NotifierConfig[threema.Config]
+	VictoropsConfigs      []*NotifierConfig[victorops.Config]
+	WebhookConfigs        []*NotifierConfig[webhook.Config]
+	WecomConfigs          []*NotifierConfig[wecom.Config]
+	WebexConfigs          []*NotifierConfig[webex.Config]
 }
 
 // NotifierConfig represents parsed GrafanaIntegrationConfig.
@@ -442,6 +444,12 @@ func parseNotifier(ctx context.Context, result *GrafanaReceiverConfig, receiver 
 			return err
 		}
 		result.OpsgenieConfigs = append(result.OpsgenieConfigs, newNotifierConfig(receiver, cfg))
+	case "logzio_opsgenie":
+		cfg, err := logzio_opsgenie.NewConfig(receiver.Settings, decryptFn)
+		if err != nil {
+			return err
+		}
+		result.LogzioOpsgenieConfigs = append(result.LogzioOpsgenieConfigs, newNotifierConfig(receiver, cfg))
 	case "pagerduty":
 		cfg, err := pagerduty.NewConfig(receiver.Settings, decryptFn)
 		if err != nil {
