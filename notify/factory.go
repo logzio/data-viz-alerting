@@ -2,6 +2,7 @@ package notify
 
 import (
 	"fmt"
+	"github.com/grafana/alerting/receivers/logzio_opsgenie"
 
 	"github.com/prometheus/alertmanager/notify"
 	"github.com/prometheus/alertmanager/types"
@@ -100,6 +101,9 @@ func BuildReceiverIntegrations(
 	}
 	for i, cfg := range receiver.OpsgenieConfigs {
 		ci(i, cfg.Metadata, opsgenie.New(cfg.Settings, cfg.Metadata, tmpl, nw(cfg.Metadata), img, nl(cfg.Metadata)))
+	}
+	for i, cfg := range receiver.LogzioOpsgenieConfigs {
+		ci(i, cfg.Metadata, logzio_opsgenie.New(cfg.Settings, cfg.Metadata, tmpl, nw(cfg.Metadata), img, nl(cfg.Metadata)))
 	}
 	for i, cfg := range receiver.PagerdutyConfigs {
 		ci(i, cfg.Metadata, pagerduty.New(cfg.Settings, cfg.Metadata, tmpl, nw(cfg.Metadata), img, nl(cfg.Metadata)))
