@@ -234,6 +234,8 @@ func (on *Notifier) buildLogzioOpsgenieMessage(ctx context.Context, alerts model
 		apiURL = on.settings.APIUrl
 	}
 
+	apiURL = fmt.Sprintf("%s?apiKey=%s", on.settings.APIUrl, on.settings.APIKey)
+
 	b, err := json.Marshal(result)
 	return b, apiURL, err
 }
