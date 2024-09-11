@@ -100,10 +100,11 @@ func (on *Notifier) buildLogzioOpsgenieMessage(ctx context.Context, alerts model
 			return nil, "", nil
 		}
 		msg := logzioOpsGenieCloseMessage{
-			Source: "Grafana",
+			Source:         "Grafana",
+			AlertEventType: "close",
 		}
 		data, err := json.Marshal(msg)
-		apiURL = fmt.Sprintf("%s/%s/close?identifierType=alias", on.settings.APIUrl, key.Hash())
+		apiURL = fmt.Sprintf("%s?apiKey=%s", on.settings.APIUrl, key.Hash())
 		return data, apiURL, err
 	}
 
@@ -253,9 +254,9 @@ func (on *Notifier) sendTags() bool {
 }
 
 type logzioOpsGenieCreateMessage struct {
-	Alias       string                                 `json:"alias"`
-	Message     string                                 `json:"message"`
-	Description string                                 `json:"description,omitempty"`
+	Alias       string                                 `json:"alert_alias"`
+	Message     string                                 `json:"alert_title"`
+	Description string                                 `json:"alert_description,omitempty"`
 	Details     map[string]interface{}                 `json:"details"`
 	Source      string                                 `json:"source"`
 	Responders  []logzioOpsGenieCreateMessageResponder `json:"responders,omitempty"`
@@ -274,5 +275,6 @@ type logzioOpsGenieCreateMessageResponder struct {
 }
 
 type logzioOpsGenieCloseMessage struct {
-	Source string `json:"source"`
+	Source         string `json:"source"`
+	AlertEventType string `json:"alert_event_type"`
 }
