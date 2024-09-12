@@ -102,9 +102,10 @@ func (on *Notifier) buildLogzioOpsgenieMessage(ctx context.Context, alerts model
 		msg := logzioOpsGenieCloseMessage{
 			Source:         "Grafana",
 			AlertEventType: "close",
+			Alias:          key.Hash(),
 		}
 		data, err := json.Marshal(msg)
-		apiURL = fmt.Sprintf("%s?apiKey=%s", on.settings.APIUrl, key.Hash())
+		apiURL = fmt.Sprintf("%s?apiKey=%s", on.settings.APIUrl, on.settings.APIKey)
 		return data, apiURL, err
 	}
 
@@ -277,4 +278,5 @@ type logzioOpsGenieCreateMessageResponder struct {
 type logzioOpsGenieCloseMessage struct {
 	Source         string `json:"source"`
 	AlertEventType string `json:"alert_event_type"`
+	Alias          string `json:"alert_alias"`
 }
