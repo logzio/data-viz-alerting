@@ -181,44 +181,6 @@ func (on *Notifier) buildLogzioOpsgenieMessage(ctx context.Context, alerts model
 	}
 	sort.Strings(tags)
 
-	responders := make([]logzioOpsGenieCreateMessageResponder, 0, len(on.settings.Responders))
-	for idx, r := range on.settings.Responders {
-		responder := logzioOpsGenieCreateMessageResponder{
-			ID:       tmpl(r.ID),
-			Name:     tmpl(r.Name),
-			Username: tmpl(r.Username),
-			Type:     tmpl(r.Type),
-		}
-
-		if responder == (logzioOpsGenieCreateMessageResponder{}) {
-			on.log.Warn("templates in the responder were expanded to empty responder. Skipping it", "idx", idx)
-			// Filter out empty responders. This is useful if you want to fill
-			// responders dynamically from alert's common labels.
-			continue
-		}
-
-		if responder.Type == "teams" {
-			teams := strings.Split(responder.Name, ",")
-			teamResponders := make([]logzioOpsGenieCreateMessageResponder, 0, len(teams))
-			for _, team := range teams {
-				if team == "" {
-					continue
-				}
-				newResponder := logzioOpsGenieCreateMessageResponder{
-					Name: team,
-					Type: "team",
-				}
-				teamResponders = append(teamResponders, newResponder)
-			}
-			if len(teamResponders) == 0 {
-				on.log.Warn("teams responder were expanded to 0 team responders. Skipping it", "idx", idx)
-			}
-			responders = append(responders, teamResponders...)
-			continue
-		}
-		responders = append(responders, responder)
-	}
-
 	result := logzioOpsGenieCreateMessage{
 		Alias:       key.Hash(),
 		Description: description,
@@ -227,7 +189,6 @@ func (on *Notifier) buildLogzioOpsgenieMessage(ctx context.Context, alerts model
 		Message:     message,
 		Details:     details,
 		Priority:    priority,
-		Responders:  responders,
 	}
 
 	apiURL = tmpl(on.settings.APIUrl)
@@ -255,24 +216,16 @@ func (on *Notifier) sendTags() bool {
 }
 
 type logzioOpsGenieCreateMessage struct {
-	Alias       string                                 `json:"alert_alias"`
-	Message     string                                 `json:"alert_title"`
-	Description string                                 `json:"alert_description,omitempty"`
-	Details     map[string]interface{}                 `json:"details"`
-	Source      string                                 `json:"source"`
-	Responders  []logzioOpsGenieCreateMessageResponder `json:"responders,omitempty"`
-	Tags        []string                               `json:"tags"`
-	Note        string                                 `json:"note,omitempty"`
-	Priority    string                                 `json:"priority,omitempty"`
-	Entity      string                                 `json:"entity,omitempty"`
-	Actions     []string                               `json:"actions,omitempty"`
-}
-
-type logzioOpsGenieCreateMessageResponder struct {
-	ID       string `json:"id,omitempty"`
-	Name     string `json:"name,omitempty"`
-	Username string `json:"username,omitempty"`
-	Type     string `json:"type"` // team, user, escalation, schedule etc.
+	Alias       string                 `json:"alert_alias"`
+	Message     string                 `json:"alert_title"`
+	Description string                 `json:"alert_description,omitempty"`
+	Details     map[string]interface{} `json:"details"`
+	Source      string                 `json:"source"`
+	Tags        []string               `json:"tags"`
+	Note        string                 `json:"note,omitempty"`
+	Priority    string                 `json:"priority,omitempty"`
+	Entity      string                 `json:"entity,omitempty"`
+	Actions     []string               `json:"actions,omitempty"`
 }
 
 type logzioOpsGenieCloseMessage struct {
