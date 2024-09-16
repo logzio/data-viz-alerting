@@ -10,19 +10,8 @@ import (
 )
 
 const (
-	SendTags    = "tags"
-	SendDetails = "details"
-	SendBoth    = "both"
-
 	DefaultAlertsURL = "https://api.opsgenie.com/v1/json/logzio"
 )
-
-type MessageResponder struct {
-	ID       string `json:"id,omitempty" yaml:"id,omitempty"`
-	Name     string `json:"name,omitempty" yaml:"name,omitempty"`
-	Username string `json:"username,omitempty" yaml:"username,omitempty"`
-	Type     string `json:"type" yaml:"type"` // team, user, escalation, schedule etc.
-}
 
 type Config struct {
 	APIKey           string
@@ -31,7 +20,6 @@ type Config struct {
 	Description      string
 	AutoClose        bool
 	OverridePriority bool
-	SendTagsAs       string
 }
 
 func NewConfig(jsonData json.RawMessage, decryptFn receivers.DecryptFunc) (Config, error) {
@@ -42,7 +30,6 @@ func NewConfig(jsonData json.RawMessage, decryptFn receivers.DecryptFunc) (Confi
 		Description      string `json:"description,omitempty" yaml:"description,omitempty"`
 		AutoClose        *bool  `json:"autoClose,omitempty" yaml:"autoClose,omitempty"`
 		OverridePriority *bool  `json:"overridePriority,omitempty" yaml:"overridePriority,omitempty"`
-		SendTagsAs       string `json:"sendTagsAs,omitempty" yaml:"sendTagsAs,omitempty"`
 	}
 
 	raw := rawSettings{}
@@ -63,14 +50,6 @@ func NewConfig(jsonData json.RawMessage, decryptFn receivers.DecryptFunc) (Confi
 		raw.Message = templates.DefaultMessageTitleEmbed
 	}
 
-	switch raw.SendTagsAs {
-	case SendTags, SendDetails, SendBoth:
-	case "":
-		raw.SendTagsAs = SendTags
-	default:
-		return Config{}, fmt.Errorf("invalid value for sendTagsAs: %q", raw.SendTagsAs)
-	}
-
 	if raw.AutoClose == nil {
 		autoClose := true
 		raw.AutoClose = &autoClose
@@ -87,6 +66,5 @@ func NewConfig(jsonData json.RawMessage, decryptFn receivers.DecryptFunc) (Confi
 		Description:      raw.Description,
 		AutoClose:        *raw.AutoClose,
 		OverridePriority: *raw.OverridePriority,
-		SendTagsAs:       raw.SendTagsAs,
 	}, nil
 }

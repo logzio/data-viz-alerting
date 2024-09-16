@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"sort"
 	"strings"
 
 	"github.com/prometheus/alertmanager/notify"
@@ -153,38 +152,27 @@ func (on *Notifier) buildLogzioOpsgenieMessage(ctx context.Context, alerts model
 
 	details := make(map[string]interface{})
 	details["url"] = ruleURL
-	if on.sendDetails() {
-		for k, v := range lbls {
-			details[k] = v
-		}
-		var imageUrls []string
-		_ = images.WithStoredImages(ctx, on.log, on.images,
-			func(_ int, image images.Image) error {
-				if len(image.URL) == 0 {
-					return nil
-				}
-				imageUrls = append(imageUrls, image.URL)
+	for k, v := range lbls {
+		details[k] = v
+	}
+	var imageUrls []string
+	_ = images.WithStoredImages(ctx, on.log, on.images,
+		func(_ int, image images.Image) error {
+			if len(image.URL) == 0 {
 				return nil
-			},
-			as...)
+			}
+			imageUrls = append(imageUrls, image.URL)
+			return nil
+		},
+		as...)
 
-		if len(imageUrls) != 0 {
-			details["image_urls"] = strings.Join(imageUrls, ", ")
-		}
+	if len(imageUrls) != 0 {
+		details["image_urls"] = strings.Join(imageUrls, ", ")
 	}
-
-	tags := make([]string, 0, len(lbls))
-	if on.sendTags() {
-		for k, v := range lbls {
-			tags = append(tags, fmt.Sprintf("%s:%s", k, v))
-		}
-	}
-	sort.Strings(tags)
 
 	result := logzioOpsGenieCreateMessage{
 		Alias:       key.Hash(),
 		Description: description,
-		Tags:        tags,
 		Source:      "Grafana",
 		Message:     message,
 		Details:     details,
@@ -207,25 +195,13 @@ func (on *Notifier) SendResolved() bool {
 	return !on.GetDisableResolveMessage()
 }
 
-func (on *Notifier) sendDetails() bool {
-	return on.settings.SendTagsAs == SendDetails || on.settings.SendTagsAs == SendBoth
-}
-
-func (on *Notifier) sendTags() bool {
-	return on.settings.SendTagsAs == SendTags || on.settings.SendTagsAs == SendBoth
-}
-
 type logzioOpsGenieCreateMessage struct {
 	Alias       string                 `json:"alert_alias"`
 	Message     string                 `json:"alert_title"`
 	Description string                 `json:"alert_description,omitempty"`
 	Details     map[string]interface{} `json:"details"`
 	Source      string                 `json:"source"`
-	Tags        []string               `json:"tags"`
-	Note        string                 `json:"note,omitempty"`
 	Priority    string                 `json:"priority,omitempty"`
-	Entity      string                 `json:"entity,omitempty"`
-	Actions     []string               `json:"actions,omitempty"`
 }
 
 type logzioOpsGenieCloseMessage struct {
