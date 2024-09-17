@@ -138,7 +138,7 @@ func (on *Notifier) buildLogzioOpsgenieMessage(ctx context.Context, alerts model
 	for k, v := range data.CommonLabels {
 		lbls[k] = tmpl(v)
 
-		// Though we disabled the override priority option in ui, we keep this code, so we can send alert priority.
+		// Though we disabled the override priority option in ui, we keep this code, so we are able to send alert priority.
 		if k == "og_priority" && on.settings.OverridePriority {
 			if ValidPriorities[v] {
 				priority = v
