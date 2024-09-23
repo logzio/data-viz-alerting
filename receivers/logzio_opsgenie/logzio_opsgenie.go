@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/grafana/alerting/models"
 	"net/http"
 	"strings"
 
@@ -74,8 +75,7 @@ func (on *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error
 		Body:       string(body),
 		HTTPMethod: http.MethodPost,
 		HTTPHeader: map[string]string{
-			"Content-Type":  "application/json",
-			"Authorization": fmt.Sprintf("GenieKey %s", on.settings.APIKey),
+			"Content-Type": "application/json",
 		},
 	}
 
@@ -157,6 +157,9 @@ func (on *Notifier) buildLogzioOpsgenieMessage(ctx context.Context, alerts model
 	for k, v := range lbls {
 		details[k] = v
 	}
+
+	alertEventSamples := string(as[0].Annotations[models.ValueStringAnnotation])
+
 	var imageUrls []string
 	_ = images.WithStoredImages(ctx, on.log, on.images,
 		func(_ int, image images.Image) error {
@@ -173,12 +176,13 @@ func (on *Notifier) buildLogzioOpsgenieMessage(ctx context.Context, alerts model
 	}
 
 	result := logzioOpsGenieCreateMessage{
-		Alias:       key.Hash(),
-		Description: description,
-		Source:      "Grafana",
-		Message:     message,
-		Details:     details,
-		Priority:    priority,
+		Alias:             key.Hash(),
+		Description:       description,
+		Source:            "Grafana",
+		Message:           message,
+		Details:           details,
+		Priority:          priority,
+		AlertEventSamples: alertEventSamples,
 	}
 
 	apiURL = tmpl(on.settings.APIUrl)
@@ -198,12 +202,13 @@ func (on *Notifier) SendResolved() bool {
 }
 
 type logzioOpsGenieCreateMessage struct {
-	Alias       string                 `json:"alert_alias"`
-	Message     string                 `json:"alert_title"`
-	Description string                 `json:"alert_description,omitempty"`
-	Details     map[string]interface{} `json:"details"`
-	Source      string                 `json:"source"`
-	Priority    string                 `json:"priority,omitempty"`
+	Alias             string                 `json:"alert_alias"`
+	Message           string                 `json:"alert_title"`
+	Description       string                 `json:"alert_description,omitempty"`
+	Details           map[string]interface{} `json:"alert_details"`
+	Source            string                 `json:"source"`
+	Priority          string                 `json:"priority,omitempty"`
+	AlertEventSamples string                 `json:"alert_event_samples,omitempty"`
 }
 
 type logzioOpsGenieCloseMessage struct {
