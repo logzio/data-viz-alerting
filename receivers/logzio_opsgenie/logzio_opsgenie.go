@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/grafana/alerting/models"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/prometheus/alertmanager/notify"
@@ -153,26 +154,19 @@ func (on *Notifier) buildLogzioOpsgenieMessage(ctx context.Context, alerts model
 	}
 
 	details := make(map[string]interface{})
-	details["url"] = ruleURL
 	for k, v := range lbls {
 		details[k] = v
 	}
 
-	alertEventSamples := string(as[0].Annotations[models.ValueStringAnnotation])
-
-	var imageUrls []string
-	_ = images.WithStoredImages(ctx, on.log, on.images,
-		func(_ int, image images.Image) error {
-			if len(image.URL) == 0 {
-				return nil
-			}
-			imageUrls = append(imageUrls, image.URL)
-			return nil
-		},
-		as...)
-
-	if len(imageUrls) != 0 {
-		details["image_urls"] = strings.Join(imageUrls, ", ")
+	var alertEventSamples string
+	var alertViewUrl string
+	if len(as) == 1 {
+		alertEventSamples = string(as[0].Annotations[models.ValueStringAnnotation])
+		generatorURL := func() *url.URL { u, _ := url.Parse(as[0].GeneratorURL); return u }()
+		alertViewUrl = receivers.ToBasePathWithAccountRedirect(generatorURL, as)
+		details["url"] = alertViewUrl
+	} else {
+		details["url"] = ruleURL
 	}
 
 	result := logzioOpsGenieCreateMessage{
@@ -183,6 +177,8 @@ func (on *Notifier) buildLogzioOpsgenieMessage(ctx context.Context, alerts model
 		Details:           details,
 		Priority:          priority,
 		AlertEventSamples: alertEventSamples,
+		AlertEventType:    "create",
+		AlertViewLink:     alertViewUrl,
 	}
 
 	apiURL = tmpl(on.settings.APIUrl)
@@ -209,6 +205,8 @@ type logzioOpsGenieCreateMessage struct {
 	Source            string                 `json:"source"`
 	Priority          string                 `json:"priority,omitempty"`
 	AlertEventSamples string                 `json:"alert_event_samples,omitempty"`
+	AlertEventType    string                 `json:"alert_event_type,omitempty"`
+	AlertViewLink     string                 `json:"alert_view_link,omitempty"`
 }
 
 type logzioOpsGenieCloseMessage struct {
