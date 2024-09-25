@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/grafana/alerting/models"
 	"net/http"
-	"net/url"
 	"strings"
 
 	"github.com/prometheus/alertmanager/notify"
@@ -159,15 +158,10 @@ func (on *Notifier) buildLogzioOpsgenieMessage(ctx context.Context, alerts model
 	}
 
 	var alertEventSamples string
-	var alertViewUrl string
 	if len(as) == 1 {
 		alertEventSamples = string(as[0].Annotations[models.ValueStringAnnotation])
-		generatorURL := func() *url.URL { u, _ := url.Parse(as[0].GeneratorURL); return u }()
-		alertViewUrl = receivers.ToBasePathWithAccountRedirect(generatorURL, as)
-		details["url"] = alertViewUrl
-	} else {
-		details["url"] = ruleURL
 	}
+	details["url"] = ruleURL
 
 	result := logzioOpsGenieCreateMessage{
 		Alias:             key.Hash(),
@@ -178,7 +172,7 @@ func (on *Notifier) buildLogzioOpsgenieMessage(ctx context.Context, alerts model
 		Priority:          priority,
 		AlertEventSamples: alertEventSamples,
 		AlertEventType:    "create",
-		AlertViewLink:     alertViewUrl,
+		AlertViewLink:     ruleURL,
 	}
 
 	apiURL = tmpl(on.settings.APIUrl)
