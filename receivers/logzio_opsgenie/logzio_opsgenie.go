@@ -19,6 +19,7 @@ import (
 	"github.com/grafana/alerting/templates"
 )
 
+// LOGZ.IO GRAFANA CHANGE :: DEV-46341 - Add support for logzio opsgenie integration
 const (
 	// https://docs.opsgenie.com/docs/alert-api - 130 characters meaning runes.
 	logzioOpsGenieMaxMessageLenRunes = 130
@@ -99,7 +100,7 @@ func (on *Notifier) buildLogzioOpsgenieMessage(ctx context.Context, alerts model
 			return nil, "", nil
 		}
 		msg := logzioOpsGenieCloseMessage{
-			Source:         "Grafana",
+			Source:         "LogzIO",
 			AlertEventType: "close",
 			Alias:          key.Hash(),
 		}
@@ -208,3 +209,5 @@ type logzioOpsGenieCloseMessage struct {
 	AlertEventType string `json:"alert_event_type"`
 	Alias          string `json:"alert_alias"`
 }
+
+// LOGZ.IO GRAFANA CHANGE :: end

@@ -1,5 +1,6 @@
 package logzio_opsgenie
 
+// LOGZ.IO GRAFANA CHANGE :: DEV-46341 - Add support for logzio opsgenie integration
 import (
 	"encoding/json"
 	"errors"
@@ -68,3 +69,5 @@ func NewConfig(jsonData json.RawMessage, decryptFn receivers.DecryptFunc) (Confi
 		OverridePriority: *raw.OverridePriority,
 	}, nil
 }
+
+// LOGZ.IO GRAFANA CHANGE :: end

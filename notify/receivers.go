@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/grafana/alerting/receivers/logzio_opsgenie"
+	"github.com/grafana/alerting/receivers/logzio_opsgenie" // LOGZ.IO GRAFANA CHANGE
 	"net/url"
 	"sort"
 	"strings"
@@ -342,7 +342,7 @@ type GrafanaReceiverConfig struct {
 	KafkaConfigs          []*NotifierConfig[kafka.Config]
 	LineConfigs           []*NotifierConfig[line.Config]
 	OpsgenieConfigs       []*NotifierConfig[opsgenie.Config]
-	LogzioOpsgenieConfigs []*NotifierConfig[logzio_opsgenie.Config]
+	LogzioOpsgenieConfigs []*NotifierConfig[logzio_opsgenie.Config] // LOGZ.IO GRAFANA CHANGE
 	PagerdutyConfigs      []*NotifierConfig[pagerduty.Config]
 	OnCallConfigs         []*NotifierConfig[oncall.Config]
 	PushoverConfigs       []*NotifierConfig[pushover.Config]
@@ -444,12 +444,16 @@ func parseNotifier(ctx context.Context, result *GrafanaReceiverConfig, receiver 
 			return err
 		}
 		result.OpsgenieConfigs = append(result.OpsgenieConfigs, newNotifierConfig(receiver, cfg))
+
+	// LOGZ.IO GRAFANA CHANGE :: DEV-46341 - Add support for logzio opsgenie integration
 	case "logzio_opsgenie":
 		cfg, err := logzio_opsgenie.NewConfig(receiver.Settings, decryptFn)
 		if err != nil {
 			return err
 		}
 		result.LogzioOpsgenieConfigs = append(result.LogzioOpsgenieConfigs, newNotifierConfig(receiver, cfg))
+	// LOGZ.IO GRAFANA CHANGE :: end
+
 	case "pagerduty":
 		cfg, err := pagerduty.NewConfig(receiver.Settings, decryptFn)
 		if err != nil {
