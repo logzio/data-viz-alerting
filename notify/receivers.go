@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/grafana/alerting/receivers/logzio_opsgenie" // LOGZ.IO GRAFANA CHANGE
+	"github.com/grafana/alerting/receivers/logzio_opsgenie" // LOGZ.IO GRAFANA CHANGE :: DEV-46341 - Add support for logzio opsgenie integration
 	"net/url"
 	"sort"
 	"strings"
@@ -342,7 +342,7 @@ type GrafanaReceiverConfig struct {
 	KafkaConfigs          []*NotifierConfig[kafka.Config]
 	LineConfigs           []*NotifierConfig[line.Config]
 	OpsgenieConfigs       []*NotifierConfig[opsgenie.Config]
-	LogzioOpsgenieConfigs []*NotifierConfig[logzio_opsgenie.Config] // LOGZ.IO GRAFANA CHANGE
+	LogzioOpsgenieConfigs []*NotifierConfig[logzio_opsgenie.Config] // LOGZ.IO GRAFANA CHANGE :: DEV-46341 - Add support for logzio opsgenie integration
 	PagerdutyConfigs      []*NotifierConfig[pagerduty.Config]
 	OnCallConfigs         []*NotifierConfig[oncall.Config]
 	PushoverConfigs       []*NotifierConfig[pushover.Config]
