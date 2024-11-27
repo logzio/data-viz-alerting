@@ -13,7 +13,7 @@ const (
 	DefaultMessageEmbed      = `{{ template "default.message" . }}`
 )
 
-// LOGZ.IO GRAFANA CHANGE :: DEV-37882 - Change template to display evaluation results
+// LOGZ.IO GRAFANA CHANGE :: DEV-45254 - Change template to display evaluation results
 var DefaultTemplateString = `
 {{ define "__subject" }}[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ if gt (.Alerts.Resolved | len) 0 }}, RESOLVED:{{ .Alerts.Resolved | len }}{{ end }}{{ end }}] {{ .GroupLabels.SortedPairs.Values | join " " }} {{ if gt (len .CommonLabels) (len .GroupLabels) }}({{ with .CommonLabels.Remove .GroupLabels.Names }}{{ .Values | join " " }}{{ end }}){{ end }}{{ end }}
 

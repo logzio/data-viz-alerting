@@ -21,7 +21,7 @@ import (
 	"github.com/grafana/alerting/models"
 )
 
-// LOGZ.IO GRAFANA CHANGE :: DEV-37882 - Access evaluation results in grafana alert template
+// LOGZ.IO GRAFANA CHANGE :: DEV-45254 - Access evaluation results in grafana alert template
 // see `extract_md.go` (extractEvalString func) so those prefixes match
 const (
 	EvalStrVarNamePrefix = "var='"
@@ -53,10 +53,10 @@ type ExtendedAlert struct {
 	ValueString   string             `json:"valueString"` // TODO: Remove in Grafana 10
 	ImageURL      string             `json:"imageURL,omitempty"`
 	EmbeddedImage string             `json:"embeddedImage,omitempty"`
-	EvalValues    []EvalValue        `json:"evalValues"` // LOGZ.IO GRAFANA CHANGE :: DEV-37882 - Access evaluation results in grafana alert template
+	EvalValues    []EvalValue        `json:"evalValues"` // LOGZ.IO GRAFANA CHANGE :: DEV-45254 - Access evaluation results in grafana alert template
 }
 
-// LOGZ.IO GRAFANA CHANGE :: DEV-37882 - Access evaluation results in grafana alert template
+// LOGZ.IO GRAFANA CHANGE :: DEV-45254 - Access evaluation results in grafana alert template
 type EvalValue struct {
 	Var    string
 	Metric string
@@ -165,7 +165,7 @@ func extendAlert(alert template.Alert, externalURL string, logger log.Logger) *E
 
 		// TODO: Remove in Grafana 10
 		extended.ValueString = alert.Annotations[models.ValueStringAnnotation]
-		extended.EvalValues = parseEvalValues(extended.ValueString) // LOGZ.IO GRAFANA CHANGE :: DEV-37882 - Access evaluation results in grafana alert template
+		extended.EvalValues = parseEvalValues(extended.ValueString) // LOGZ.IO GRAFANA CHANGE :: DEV-45254 - Access evaluation results in grafana alert template
 	}
 
 	matchers := make([]string, 0)
@@ -262,7 +262,7 @@ func (as ExtendedAlerts) Resolved() []ExtendedAlert {
 	return res
 }
 
-// LOGZ.IO GRAFANA CHANGE :: DEV-37882 - Access evaluation results in grafana alert template
+// LOGZ.IO GRAFANA CHANGE :: DEV-45254 - Access evaluation results in grafana alert template
 func parseEvalValues(evaluationStr string) []EvalValue {
 	// Example of eval string - [ var='I0' metric='eu-central-1' labels={region=eu-central-1} value=1 ], metric is optional
 	evalValues := make([]EvalValue, 0)
