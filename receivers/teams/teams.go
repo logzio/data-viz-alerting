@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/pkg/errors"
 
@@ -327,6 +328,9 @@ func (tn *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error
 
 //nolint:revive
 func validateResponse(b []byte, statusCode int) error {
+	if statusCode == http.StatusAccepted {
+		return nil
+	}
 	// The request succeeded if the response is "1"
 	// https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using?tabs=cURL#send-messages-using-curl-and-powershell
 	if !bytes.Equal(b, []byte("1")) {
