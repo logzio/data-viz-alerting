@@ -336,6 +336,7 @@ func validateResponse(b []byte, statusCode int) error {
 	if !bytes.Equal(b, []byte("1")) {
 		return errors.New(string(b))
 	}
+
 	return nil
 }
 
