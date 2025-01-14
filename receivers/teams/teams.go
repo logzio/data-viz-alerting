@@ -297,6 +297,8 @@ func (tn *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error
 	msg := NewAdaptiveCardsMessage(card)
 	msg.Summary = tmpl(tn.settings.Title)
 
+	tn.log.Warn("irina test data-viz-alerting 1")
+
 	// This check for tmplErr must happen before templating the URL
 	if tmplErr != nil {
 		tn.log.Warn("failed to template Teams message", "error", tmplErr.Error())
@@ -318,6 +320,7 @@ func (tn *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error
 	// Teams sometimes does not use status codes to show when a request has failed. Instead, the
 	// response can contain an error message, irrespective of status code (i.e. https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using?tabs=cURL#rate-limiting-for-connectors)
 	cmd.Validation = validateResponse
+	tn.log.Warn("irina test data-viz-alerting 2")
 
 	if err := tn.ns.SendWebhook(ctx, cmd); err != nil {
 		return false, errors.Wrap(err, "send notification to Teams")
@@ -328,6 +331,7 @@ func (tn *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error
 
 //nolint:revive
 func validateResponse(b []byte, statusCode int) error {
+
 	if statusCode == http.StatusAccepted {
 		return nil
 	}
