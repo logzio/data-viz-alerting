@@ -323,7 +323,8 @@ func (tn *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error
 	tn.log.Warn("irina test data-viz-alerting 2")
 
 	if err := tn.ns.SendWebhook(ctx, cmd); err != nil {
-		return false, errors.Wrap(err, "send notification to Teams")
+		fmt.Errorf("irina err: %w", err)
+		return false, errors.Wrap(err, "send notification to Teams + irina test data-viz-alerting-3")
 	}
 
 	return true, nil
