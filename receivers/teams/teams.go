@@ -328,7 +328,6 @@ func (tn *Notifier) Notify(ctx context.Context, as ...*types.Alert) (bool, error
 
 //nolint:revive
 func validateResponse(b []byte, statusCode int) error {
-
 	if statusCode == http.StatusAccepted {
 		return nil
 	}
