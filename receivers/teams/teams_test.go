@@ -298,9 +298,13 @@ func TestNotify(t *testing.T) {
 }
 
 func Test_ValidateResponse(t *testing.T) {
-	randInt := rand.Int() + http.StatusAccepted
-	require.NoError(t, validateResponse([]byte("1"), randInt))
-	err := validateResponse([]byte("some error message"), randInt)
-	require.Error(t, err)
-	require.Equal(t, "some error message", err.Error())
+	require.NoError(t, validateResponse([]byte("1"), rand.Int()))
+	randomStatus := rand.Int()
+	if http.StatusAccepted == randomStatus {
+		require.NoError(t, validateResponse([]byte("something"), randomStatus))
+	} else {
+		err := validateResponse([]byte("some error message"), randomStatus)
+		require.Error(t, err)
+		require.Equal(t, "some error message", err.Error())
+	}
 }
