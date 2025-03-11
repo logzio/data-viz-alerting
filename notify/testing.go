@@ -10,26 +10,15 @@ import (
 
 	"github.com/prometheus/alertmanager/types"
 
-	"github.com/grafana/alerting/receivers/alertmanager"
-	"github.com/grafana/alerting/receivers/dinding"
-	"github.com/grafana/alerting/receivers/discord"
 	"github.com/grafana/alerting/receivers/email"
 	"github.com/grafana/alerting/receivers/googlechat"
-	"github.com/grafana/alerting/receivers/kafka"
-	"github.com/grafana/alerting/receivers/line"
 	"github.com/grafana/alerting/receivers/opsgenie"
 	"github.com/grafana/alerting/receivers/pagerduty"
-	"github.com/grafana/alerting/receivers/pushover"
-	"github.com/grafana/alerting/receivers/sensugo"
 	"github.com/grafana/alerting/receivers/slack"
 	"github.com/grafana/alerting/receivers/teams"
-	"github.com/grafana/alerting/receivers/telegram"
 	receiversTesting "github.com/grafana/alerting/receivers/testing"
-	"github.com/grafana/alerting/receivers/threema"
 	"github.com/grafana/alerting/receivers/victorops"
-	"github.com/grafana/alerting/receivers/webex"
 	"github.com/grafana/alerting/receivers/webhook"
-	"github.com/grafana/alerting/receivers/wecom"
 	"github.com/grafana/alerting/templates"
 )
 
@@ -119,31 +108,32 @@ func GetDecryptedValueFnForTesting(_ context.Context, sjd map[string][]byte, key
 }
 
 var AllKnownConfigsForTesting = map[string]NotifierConfigTest{
-	"prometheus-alertmanager": {
-		NotifierType: "prometheus-alertmanager",
-		Config:       alertmanager.FullValidConfigForTesting,
-		Secrets:      alertmanager.FullValidSecretsForTesting,
-	},
-	"dingding": {NotifierType: "dingding",
-		Config: dinding.FullValidConfigForTesting,
-	},
-	"discord": {NotifierType: "discord",
-		Config: discord.FullValidConfigForTesting,
-	},
+	// LOGZ.IO GRAFANA CHANGE :: DEV-47388 Remove unsupported contact points
+	//"prometheus-alertmanager": {
+	//	NotifierType: "prometheus-alertmanager",
+	//	Config:       alertmanager.FullValidConfigForTesting,
+	//	Secrets:      alertmanager.FullValidSecretsForTesting,
+	//},
+	//"dingding": {NotifierType: "dingding",
+	//	Config: dinding.FullValidConfigForTesting,
+	//},
+	//"discord": {NotifierType: "discord",
+	//	Config: discord.FullValidConfigForTesting,
+	//},
 	"email": {NotifierType: "email",
 		Config: email.FullValidConfigForTesting,
 	},
 	"googlechat": {NotifierType: "googlechat",
 		Config: googlechat.FullValidConfigForTesting,
 	},
-	"kafka": {NotifierType: "kafka",
-		Config:  kafka.FullValidConfigForTesting,
-		Secrets: kafka.FullValidSecretsForTesting,
-	},
-	"line": {NotifierType: "line",
-		Config:  line.FullValidConfigForTesting,
-		Secrets: line.FullValidSecretsForTesting,
-	},
+	//"kafka": {NotifierType: "kafka",
+	//	Config:  kafka.FullValidConfigForTesting,
+	//	Secrets: kafka.FullValidSecretsForTesting,
+	//},
+	//"line": {NotifierType: "line",
+	//	Config:  line.FullValidConfigForTesting,
+	//	Secrets: line.FullValidSecretsForTesting,
+	//},
 	"opsgenie": {NotifierType: "opsgenie",
 		Config:  opsgenie.FullValidConfigForTesting,
 		Secrets: opsgenie.FullValidSecretsForTesting,
@@ -152,14 +142,14 @@ var AllKnownConfigsForTesting = map[string]NotifierConfigTest{
 		Config:  pagerduty.FullValidConfigForTesting,
 		Secrets: pagerduty.FullValidSecretsForTesting,
 	},
-	"pushover": {NotifierType: "pushover",
-		Config:  pushover.FullValidConfigForTesting,
-		Secrets: pushover.FullValidSecretsForTesting,
-	},
-	"sensugo": {NotifierType: "sensugo",
-		Config:  sensugo.FullValidConfigForTesting,
-		Secrets: sensugo.FullValidSecretsForTesting,
-	},
+	//"pushover": {NotifierType: "pushover",
+	//	Config:  pushover.FullValidConfigForTesting,
+	//	Secrets: pushover.FullValidSecretsForTesting,
+	//},
+	//"sensugo": {NotifierType: "sensugo",
+	//	Config:  sensugo.FullValidConfigForTesting,
+	//	Secrets: sensugo.FullValidSecretsForTesting,
+	//},
 	"slack": {NotifierType: "slack",
 		Config:  slack.FullValidConfigForTesting,
 		Secrets: slack.FullValidSecretsForTesting,
@@ -167,14 +157,14 @@ var AllKnownConfigsForTesting = map[string]NotifierConfigTest{
 	"teams": {NotifierType: "teams",
 		Config: teams.FullValidConfigForTesting,
 	},
-	"telegram": {NotifierType: "telegram",
-		Config:  telegram.FullValidConfigForTesting,
-		Secrets: telegram.FullValidSecretsForTesting,
-	},
-	"threema": {NotifierType: "threema",
-		Config:  threema.FullValidConfigForTesting,
-		Secrets: threema.FullValidSecretsForTesting,
-	},
+	//"telegram": {NotifierType: "telegram",
+	//	Config:  telegram.FullValidConfigForTesting,
+	//	Secrets: telegram.FullValidSecretsForTesting,
+	//},
+	//"threema": {NotifierType: "threema",
+	//	Config:  threema.FullValidConfigForTesting,
+	//	Secrets: threema.FullValidSecretsForTesting,
+	//},
 	"victorops": {NotifierType: "victorops",
 		Config: victorops.FullValidConfigForTesting,
 	},
@@ -182,14 +172,15 @@ var AllKnownConfigsForTesting = map[string]NotifierConfigTest{
 		Config:  webhook.FullValidConfigForTesting,
 		Secrets: webhook.FullValidSecretsForTesting,
 	},
-	"wecom": {NotifierType: "wecom",
-		Config:  wecom.FullValidConfigForTesting,
-		Secrets: wecom.FullValidSecretsForTesting,
-	},
-	"webex": {NotifierType: "webex",
-		Config:  webex.FullValidConfigForTesting,
-		Secrets: webex.FullValidSecretsForTesting,
-	},
+	//"wecom": {NotifierType: "wecom",
+	//	Config:  wecom.FullValidConfigForTesting,
+	//	Secrets: wecom.FullValidSecretsForTesting,
+	//},
+	//"webex": {NotifierType: "webex",
+	//	Config:  webex.FullValidConfigForTesting,
+	//	Secrets: webex.FullValidSecretsForTesting,
+	//},
+	// LOGZ.IO GRAFANA CHANGE :: End
 }
 
 type NotifierConfigTest struct {
