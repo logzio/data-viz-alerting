@@ -491,12 +491,12 @@ func parseNotifier(ctx context.Context, result *GrafanaReceiverConfig, receiver 
 			return err
 		}
 		result.TeamsConfigs = append(result.TeamsConfigs, newNotifierConfig(receiver, cfg))
-	//case "telegram":
-	//	cfg, err := telegram.NewConfig(receiver.Settings, decryptFn)
-	//	if err != nil {
-	//		return err
-	//	}
-	//	result.TelegramConfigs = append(result.TelegramConfigs, newNotifierConfig(receiver, cfg))
+	case "telegram":
+		cfg, err := telegram.NewConfig(receiver.Settings, decryptFn)
+		if err != nil {
+			return err
+		}
+		result.TelegramConfigs = append(result.TelegramConfigs, newNotifierConfig(receiver, cfg))
 	//case "threema":
 	//	cfg, err := threema.NewConfig(receiver.Settings, decryptFn)
 	//	if err != nil {
