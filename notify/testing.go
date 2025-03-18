@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/grafana/alerting/receivers/telegram"
 	"testing"
 	"time"
 
@@ -157,10 +158,10 @@ var AllKnownConfigsForTesting = map[string]NotifierConfigTest{
 	"teams": {NotifierType: "teams",
 		Config: teams.FullValidConfigForTesting,
 	},
-	//"telegram": {NotifierType: "telegram",
-	//	Config:  telegram.FullValidConfigForTesting,
-	//	Secrets: telegram.FullValidSecretsForTesting,
-	//},
+	"telegram": {NotifierType: "telegram",
+		Config:  telegram.FullValidConfigForTesting,
+		Secrets: telegram.FullValidSecretsForTesting,
+	},
 	//"threema": {NotifierType: "threema",
 	//	Config:  threema.FullValidConfigForTesting,
 	//	Secrets: threema.FullValidSecretsForTesting,
